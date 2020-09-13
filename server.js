@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require('./config/db');
 const bodyParser = require('body-parser');
 
+//Create an Express App instance
 const app = express();
 
 // Connect DB
