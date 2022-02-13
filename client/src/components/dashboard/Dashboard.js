@@ -1,17 +1,24 @@
 import React, {Fragment, useEffect} from 'react';
-import {Link} from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { getCurrentProfile } from '../../actions/profile';
 import { connect } from 'react-redux';
 import Spinner from '../layout/Spinner';
 import DashboardActions from './DashboardActions';
+import Experience from './Experience';
+import Education from './Education';
 
-const Dashboard = ({getCurrentProfile, auth: {user}, profile: {profile, loading}}) => {
+const Dashboard = ({
+    getCurrentProfile, 
+    auth: {user}, 
+    profile: {profile, loading}
+}) => {
     useEffect(() => {
         getCurrentProfile();
-    }, [])
+    }, []);
 
-  return loading && profile === null ? <Spinner /> : <Fragment>
+  return loading && profile === null ? <Spinner /> : 
+  <Fragment>
     <h1 className='large text-primary'>Dashboard</h1>
     <p className='lead'>
         <i className='fas fa-user'></i>{' '}
@@ -21,6 +28,8 @@ const Dashboard = ({getCurrentProfile, auth: {user}, profile: {profile, loading}
     {profile !== null ? 
     <Fragment>
         <DashboardActions />
+        <Experience experience={profile.experience} />
+        <Education education={profile.education} />
     </Fragment> : 
     <Fragment>
         <p>You haven't set up your profile yet, please add your details</p>
