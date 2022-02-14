@@ -7,8 +7,10 @@ import {
     GET_PROFILE,
     PROFILE_ERROR,
     UPDATE_PROFILE,
+    UPDATE_PROFILES,
     ACCOUNT_DELETED,
-    CLEAR_PROFILE
+    CLEAR_PROFILE,
+    GET_REPOS
 } from './types'
 
 
@@ -18,6 +20,59 @@ export const getCurrentProfile = () => async dispatch => {
 
         dispatch({
             type: GET_PROFILE,
+            payload: res.data
+        });
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR,
+            payload: { msg: err.response.statusText, status: err.response.status }
+        });
+    }
+};
+
+// Get all profiles
+export const getCurrentProfiles = () => async dispatch => {
+    try {
+      //Make sure to clear any current user profile from State
+      dispatch({type: CLEAR_PROFILE});
+        const res = await axios.get('/api/profile');
+
+        dispatch({
+            type: GET_PROFILES,
+            payload: res.data
+        });
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR,
+            payload: { msg: err.response.statusText, status: err.response.status }
+        });
+    }
+};
+
+// Get profile by ID
+export const getCurrentProfileById = (userId) => async dispatch => {
+    try {
+        const res = await axios.get(`/api/profile/user/${userId}`);
+
+        dispatch({
+            type: GET_PROFILE,
+            payload: res.data
+        });
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR,
+            payload: { msg: err.response.statusText, status: err.response.status }
+        });
+    }
+};
+
+//Get GitHub repos
+export const getGithubRepos = username => async dispatch => {
+    try {
+        const res = await axios.get(`/api/profile/github/${username}`);
+
+        dispatch({
+            type: GET_REPOS,
             payload: res.data
         });
     } catch (err) {
@@ -66,38 +121,32 @@ export const createProfile = (formData, history, edit = false) => async dispatch
 }
 
 // Add Experience
-export const addExperience = (formData, history) => async dispatch => {
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      };
+// Add Experience
+export const addExperience = (formData, navigate) => async (dispatch) => {
+  try {
+    const res = await axios.put('/profile/experience', formData);
 
-      const res = await axios.put('/api/profile/experience', formData, config);
+    dispatch({
+      type: UPDATE_PROFILE,
+      payload: res.data
+    });
 
-      dispatch({
-        type: UPDATE_PROFILE,
-        payload: res.data
-      });
+    dispatch(setAlert('Experience Added', 'success'));
 
-      dispatch(setAlert('Experience Added', 'success'));
+    navigate('/dashboard');
+  } catch (err) {
+    const errors = err.response.data.errors;
 
-    //   history.push('/dashboard');
-
-    } catch (err) {
-      const errors = err.response.data.errors;
-
-      if (errors) {
-        errors.forEach(error => dispatch(setAlert(error.msg, 'danger')));
-      }
-
-      dispatch({
-        type: PROFILE_ERROR,
-        payload: { msg: err.response.statusText, status: err.response.status }
-      });
+    if (errors) {
+      errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
     }
-  };
+
+    dispatch({
+      type: PROFILE_ERROR,
+      payload: { msg: err.response.statusText, status: err.response.status }
+    });
+  }
+};
 
 // Add Education
 export const addEducation = (formData, history) => async dispatch => {
